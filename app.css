@@ -21,6 +21,7 @@
 /* ── Design tokens ───────────────────────────────────────────── */
 :root {
   --ns-primary:       #16a34a;
+  --ns-primary-rgb:   22, 163, 74;  /* rgb() of --ns-primary — rgba() can't read a var() that holds a hex color, only one that holds bare components, so consumers wanting a translucent tint of the brand color do rgba(var(--ns-primary-rgb), .12) instead of hardcoding it */
   --ns-primary-dark:  #15803d;
   --ns-navbar:        #0f172a;
   --ns-surface:       #f1f5f9;
