@@ -1,0 +1,41 @@
+{
+  "_comment": "Cross-app navigation directory, shared by every app in this family so the switcher menu is defined once instead of duplicated per repo. `authentik_group` must match a group created by user-management-apps's authentik/scripts/setup_app_access_control.py — an app only shows up in a given user's switcher if one of their OIDC `groups` claim values equals this field. `icon` is a Bootstrap Icons class (bi-...) for the Bootstrap/Jinja apps; `emoji` is the fallback for Streamlit apps, which can't load the Bootstrap Icons font (see cgm_abbot_connector/src/streamlit_dashboard.py's _render_navbar for why).",
+  "apps": [
+    {
+      "id": "chat",
+      "brand": "Health",
+      "accent": "Chat",
+      "url": "https://192.168.0.59:8888",
+      "icon": "bi-heart-pulse-fill",
+      "emoji": "🩺",
+      "authentik_group": "app-chat"
+    },
+    {
+      "id": "strava",
+      "brand": "Strava",
+      "accent": "Dashboard",
+      "url": "https://192.168.0.59:5011",
+      "icon": "bi-bicycle",
+      "emoji": "🚴",
+      "authentik_group": "app-strava"
+    },
+    {
+      "id": "cgm",
+      "brand": "CGM",
+      "accent": "Dashboard",
+      "url": "https://192.168.0.59:8502",
+      "icon": "bi-droplet-half",
+      "emoji": "🩸",
+      "authentik_group": "app-cgm"
+    },
+    {
+      "id": "food",
+      "brand": "Nutri",
+      "accent": "Scan",
+      "url": "https://192.168.0.59:5010",
+      "icon": "bi-leaf-fill",
+      "emoji": "🥗",
+      "authentik_group": "app-food"
+    }
+  ]
+}

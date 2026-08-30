@@ -17,10 +17,10 @@ no local copy to keep in sync:
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.2.0/app.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.3.0/app.css">
 ```
 
-Pin a version tag (`@v1.2.0`), not `@main` — a change here shouldn't be able
+Pin a version tag (`@v1.3.0`), not `@main` — a change here shouldn't be able
 to silently reflow a running app. Bump the tag when you intentionally want
 consumers to pick up a change, then update the pinned version in each app.
 
@@ -40,7 +40,7 @@ import streamlit as st
 @st.cache_data(ttl=3600)
 def _fetch_shared_theme_css() -> str:
     resp = requests.get(
-        "https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.2.0/app.css",
+        "https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.3.0/app.css",
         timeout=5,
     )
     resp.raise_for_status()
@@ -60,6 +60,54 @@ for a working example (it already runs once at container startup, before
 `streamlit run`, to provision the OIDC `[auth]` secrets and TLS cert the
 same way).
 
+## Cross-app navigation (`apps.json` + `switcher.js`)
+
+`apps.json` is the one place every app's identity (name, URL, icon) and
+which Authentik access group grants entry to it are listed — see
+`user-management-apps`'s `authentik/scripts/setup_app_access_control.py`
+for how those groups get created and populated. Each app reads the logged-in
+user's `groups` claim from its own OIDC token (request `groups` as an extra
+scope — none of `openid`/`profile`/`email`/`offline_access` surface it) and
+shows only the sibling apps whose `authentik_group` is in that list.
+
+**Bootstrap/Jinja apps:** give the navbar a mount point, then load
+`switcher.js` — it fetches `apps.json` itself and renders a "Apps" dropdown,
+or removes the mount point entirely if the user has access to nothing else:
+
+```html
+<li class="nav-item" id="app-switcher" data-current-app="chat"></li>
+<script>window.__USER_GROUPS__ = {{ session.user.groups | tojson }};</script>
+<script src="https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.3.0/switcher.js" defer></script>
+```
+
+Needs Bootstrap 5's JS bundle on the page already (for the dropdown itself)
+and `data-current-app` set to that app's `id` in `apps.json`, so it doesn't
+link to itself.
+
+**Streamlit apps:** don't load `switcher.js` — injecting Bootstrap's
+dropdown JS into Streamlit's DOM has the same fragility `app.css` injection
+already works around (see above), and `st.user`'s groups are already in
+Python, not worth a round trip through JS. Fetch `apps.json` the same way as
+`app.css`/`theme.toml` and render plain links next to the navbar's logout
+button instead of a dropdown:
+
+```python
+@st.cache_data(ttl=3600)
+def _fetch_apps_directory() -> list[dict]:
+    resp = requests.get(
+        "https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.3.0/apps.json",
+        timeout=5,
+    )
+    resp.raise_for_status()
+    return resp.json()["apps"]
+
+user_groups = st.user.get("groups") or []
+other_apps = [
+    app for app in _fetch_apps_directory()
+    if app["id"] != "cgm" and app["authentik_group"] in user_groups
+]
+```
+
 ## What belongs here vs. in the app
 
 This file only has generic, reusable pieces: color tokens, navbar, page
@@ -73,7 +121,7 @@ tokens (`var(--ns-primary)`, etc.) without polluting the shared file.
 
 ```bash
 git commit -am "..."
-git tag v1.2.0
+git tag v1.3.0
 git push && git push --tags
 ```
 
