@@ -23,7 +23,10 @@
  * other apps' groups, rather than showing an empty "Apps" menu.
  */
 (function () {
-  var APPS_URL = "https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.3.0/apps.json";
+  // Pinned to @main, not a version tag like this script itself - apps.json is pure data
+  // (URLs/names/groups), so a change to it doesn't need a tag bump + re-pin in every app to go
+  // live. See README.md's "Releasing an apps.json change".
+  var APPS_URL = "https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@main/apps.json";
 
   var mount = document.getElementById("app-switcher");
   if (!mount) return;

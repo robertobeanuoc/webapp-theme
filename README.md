@@ -70,6 +70,14 @@ user's `groups` claim from its own OIDC token (request `groups` as an extra
 scope — none of `openid`/`profile`/`email`/`offline_access` surface it) and
 shows only the sibling apps whose `authentik_group` is in that list.
 
+**`apps.json` is pinned to `@main`, not a version tag** — unlike `app.css`/
+`theme.toml`/`switcher.js` above. It's pure data (URLs/names/groups), not
+code or styling: a bad edit only breaks a menu link, not a running app's
+layout, so it doesn't need the same "review a tag bump before it goes live"
+gate. This also means updating a URL here needs **no redeploy of any app** —
+see "Releasing an apps.json change" below for how it actually reaches
+already-running apps, and how fast.
+
 **Bootstrap/Jinja apps:** give the navbar a mount point, then load
 `switcher.js` — it fetches `apps.json` itself and renders a "Apps" dropdown,
 or removes the mount point entirely if the user has access to nothing else:
@@ -80,22 +88,25 @@ or removes the mount point entirely if the user has access to nothing else:
 <script src="https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.3.0/switcher.js" defer></script>
 ```
 
-Needs Bootstrap 5's JS bundle on the page already (for the dropdown itself)
-and `data-current-app` set to that app's `id` in `apps.json`, so it doesn't
-link to itself.
+`switcher.js` itself stays pinned to a tag (it's code); only the `apps.json`
+URL *inside* `switcher.js` floats on `@main`. Needs Bootstrap 5's JS bundle
+on the page already (for the dropdown itself) and `data-current-app` set to
+that app's `id` in `apps.json`, so it doesn't link to itself.
 
-**Streamlit apps:** don't load `switcher.js` — injecting Bootstrap's
-dropdown JS into Streamlit's DOM has the same fragility `app.css` injection
-already works around (see above), and `st.user`'s groups are already in
-Python, not worth a round trip through JS. Fetch `apps.json` the same way as
-`app.css`/`theme.toml` and render plain links next to the navbar's logout
-button instead of a dropdown:
+**Streamlit apps:** don't load `switcher.js` — Bootstrap's real dropdown JS
+bundle can't be inlined via `st.html()` either (it builds Tooltip/Popover
+markup from template strings containing tag-like text, which gets the whole
+script stripped the same way a tag-like CSS comment does). Fetch `apps.json`
+the same way as `app.css`/`theme.toml`, but pinned to `@main`, and render a
+small hand-rolled open/close dropdown instead — see `cgm_abbot_connector`'s
+or `health-gen-ai-chat`'s `streamlit_dashboard.py` (`_render_navbar()`) for
+the full toggle script. In short:
 
 ```python
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=60)  # short: apps.json floats on @main, not a pinned tag - see above
 def _fetch_apps_directory() -> list[dict]:
     resp = requests.get(
-        "https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.3.0/apps.json",
+        "https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@main/apps.json",
         timeout=5,
     )
     resp.raise_for_status()
@@ -126,3 +137,26 @@ git push && git push --tags
 ```
 
 Then update the pinned `@vX.Y.Z` in whichever apps should pick it up.
+
+## Releasing an `apps.json` change
+
+No tag, no redeploy - just commit and push to `main`:
+
+```bash
+git commit -am "..."
+git push
+```
+
+Two caches sit between that push and every app actually seeing it:
+
+1. **jsDelivr's CDN cache** for `@main` (unlike a version tag, which is
+   cached indefinitely since a tag shouldn't change) refreshes every ~12h on
+   its own. To force it sooner, purge that one file:
+   ```bash
+   curl "https://purge.jsdelivr.net/gh/robertobeanuoc/webapp-theme@main/apps.json"
+   ```
+2. **Each Streamlit app's own `@st.cache_data(ttl=60)`** on `_fetch_apps_directory()`
+   (see above) - expires on its own within a minute, nothing to purge.
+   Bootstrap/Jinja apps have no server-side cache for this at all: `switcher.js`
+   fetches fresh on every page load, so the jsDelivr purge alone is enough
+   for those.
