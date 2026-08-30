@@ -1,0 +1,14 @@
+# Shared Streamlit theme, matching the Bootstrap/Jinja apps' navbar-and-card
+# look (app.css in this same repo). Consumed by cgm_abbot_connector and
+# health-gen-ai-chat's Streamlit dashboards - see each repo's
+# write_streamlit_secrets.py, which fetches this file at container startup
+# and writes it to ~/.streamlit/config.toml (Streamlit has no <link>-style
+# way to point at a remote config file for [theme], only [theme].base,
+# which is for inheriting from another *theme*, not for this file wholesale).
+[theme]
+base = "light"
+primaryColor = "#16a34a"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f1f5f9"
+textColor = "#0f172a"
+font = "sans serif"

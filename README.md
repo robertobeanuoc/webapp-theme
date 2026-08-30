@@ -17,32 +17,48 @@ no local copy to keep in sync:
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.0.0/app.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.2.0/app.css">
 ```
 
-Pin a version tag (`@v1.0.0`), not `@main` — a change here shouldn't be able
+Pin a version tag (`@v1.2.0`), not `@main` — a change here shouldn't be able
 to silently reflow a running app. Bump the tag when you intentionally want
 consumers to pick up a change, then update the pinned version in each app.
 
 ## Usage (Streamlit)
 
-Streamlit doesn't load an external stylesheet by default, but `st.markdown`
-can inject one into the page:
+Streamlit's `st.html()` strips `<link>` and `<style>` tags whose text
+contains anything that looks like another disallowed tag — including plain
+text inside a CSS comment, since it isn't CSS-aware. In practice that rules
+out linking `app.css` directly; fetch its text and inline it into a
+`<style>` tag instead, stripping comments first:
 
 ```python
+import re
+import requests
 import streamlit as st
 
-st.markdown(
-    '<link rel="stylesheet" '
-    'href="https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.0.0/app.css">',
-    unsafe_allow_html=True,
-)
+@st.cache_data(ttl=3600)
+def _fetch_shared_theme_css() -> str:
+    resp = requests.get(
+        "https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.2.0/app.css",
+        timeout=5,
+    )
+    resp.raise_for_status()
+    return resp.text
+
+css = re.sub(r"/\*.*?\*/", "", _fetch_shared_theme_css(), flags=re.S)
+st.html(f"<style>{css}</style>")
 ```
 
-This only styles custom HTML you render yourself via `unsafe_allow_html`
-(e.g. badges, cards) — Streamlit's built-in widgets are themed separately
-through `.streamlit/config.toml` (`primaryColor = "#16a34a"`, etc.) since
-they don't carry Bootstrap's class names.
+This only styles custom HTML you render yourself via `st.html()` (e.g.
+badges, a navbar built from `st.container(key=...)`) — Streamlit's built-in
+widgets (buttons, selects) are themed separately, since they don't carry
+Bootstrap's class names. For those, fetch `theme.toml` the same way and
+write it to `~/.streamlit/config.toml` before the Streamlit server starts —
+see `cgm_abbot_connector`'s or `health-gen-ai-chat`'s `write_streamlit_secrets.py`
+for a working example (it already runs once at container startup, before
+`streamlit run`, to provision the OIDC `[auth]` secrets and TLS cert the
+same way).
 
 ## What belongs here vs. in the app
 
@@ -57,7 +73,7 @@ tokens (`var(--ns-primary)`, etc.) without polluting the shared file.
 
 ```bash
 git commit -am "..."
-git tag v1.1.0
+git tag v1.2.0
 git push && git push --tags
 ```
 
