@@ -26,39 +26,35 @@ consumers to pick up a change, then update the pinned version in each app.
 
 ## Usage (Streamlit)
 
-Streamlit's `st.html()` strips `<link>` and `<style>` tags whose text
-contains anything that looks like another disallowed tag — including plain
-text inside a CSS comment, since it isn't CSS-aware. In practice that rules
-out linking `app.css` directly; fetch its text and inline it into a
-`<style>` tag instead, stripping comments first:
+**Navbar + app-switcher: use the `webapp-theme-streamlit` package (`python/` in this repo), not a copy-pasted snippet.** This used to be a "fetch app.css yourself, strip comments, inline it" recipe repeated in each Streamlit app - which is exactly how a fix (the app-switcher's icon) landed in one app and silently not the other, since there was no single place to fix it once for both. See `python/README.md` for install + usage; in short:
 
 ```python
-import re
-import requests
 import streamlit as st
+from webapp_theme_streamlit import inject_shared_theme, render_app_switcher
 
-@st.cache_data(ttl=3600)
-def _fetch_shared_theme_css() -> str:
-    resp = requests.get(
-        "https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.3.0/app.css",
-        timeout=5,
-    )
-    resp.raise_for_status()
-    return resp.text
-
-css = re.sub(r"/\*.*?\*/", "", _fetch_shared_theme_css(), flags=re.S)
-st.html(f"<style>{css}</style>")
+inject_shared_theme(extra_css=MY_APP_SPECIFIC_CSS)  # e.g. stMetric/stForm rules
+with st.container(key="app_navbar"):
+    cols = st.columns([4, 3, 2, 1])
+    with cols[0]:
+        st.html(f'<span class="navbar-brand">{icon} {brand}<span class="brand-accent">{accent}</span></span>')
+    with cols[1]:
+        render_app_switcher(current_app_id="cgm", user_groups=user["groups"], apps_label=apps_label)
+    with cols[2]:
+        ...  # this app's own profile popover
+    with cols[3]:
+        ...  # this app's own logout button
 ```
 
-This only styles custom HTML you render yourself via `st.html()` (e.g.
-badges, a navbar built from `st.container(key=...)`) — Streamlit's built-in
-widgets (buttons, selects) are themed separately, since they don't carry
-Bootstrap's class names. For those, fetch `theme.toml` the same way and
-write it to `~/.streamlit/config.toml` before the Streamlit server starts —
-see `cgm_abbot_connector`'s or `health-gen-ai-chat`'s `write_streamlit_secrets.py`
-for a working example (it already runs once at container startup, before
-`streamlit run`, to provision the OIDC `[auth]` secrets and TLS cert the
-same way).
+`inject_shared_theme()` handles fetching `app.css` (Streamlit's `st.html()`
+strips `<link>` tags, so it has to be fetched and inlined into a `<style>`
+tag instead) and combining it with the navbar/switcher CSS every Streamlit
+app in this family needs. Streamlit's own widgets (buttons, selects) are
+themed separately, since they don't carry Bootstrap's class names — fetch
+`theme.toml` and write it to `~/.streamlit/config.toml` before the
+Streamlit server starts; see `cgm_abbot_connector`'s or
+`health-gen-ai-chat`'s `write_streamlit_secrets.py` for a working example
+(it already runs once at container startup, before `streamlit run`, to
+provision the OIDC `[auth]` secrets and TLS cert the same way).
 
 ## Cross-app navigation (`apps.json` + `switcher.js`)
 
@@ -96,28 +92,12 @@ that app's `id` in `apps.json`, so it doesn't link to itself.
 **Streamlit apps:** don't load `switcher.js` — Bootstrap's real dropdown JS
 bundle can't be inlined via `st.html()` either (it builds Tooltip/Popover
 markup from template strings containing tag-like text, which gets the whole
-script stripped the same way a tag-like CSS comment does). Fetch `apps.json`
-the same way as `app.css`/`theme.toml`, but pinned to `@main`, and render a
-small hand-rolled open/close dropdown instead — see `cgm_abbot_connector`'s
-or `health-gen-ai-chat`'s `streamlit_dashboard.py` (`_render_navbar()`) for
-the full toggle script. In short:
-
-```python
-@st.cache_data(ttl=60)  # short: apps.json floats on @main, not a pinned tag - see above
-def _fetch_apps_directory() -> list[dict]:
-    resp = requests.get(
-        "https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@main/apps.json",
-        timeout=5,
-    )
-    resp.raise_for_status()
-    return resp.json()["apps"]
-
-user_groups = st.user.get("groups") or []
-other_apps = [
-    app for app in _fetch_apps_directory()
-    if app["id"] != "cgm" and app["authentik_group"] in user_groups
-]
-```
+script stripped the same way a tag-like CSS comment does; a plain `<svg>`
+icon gets stripped outright too, confirmed by inspecting the rendered DOM).
+Use `render_app_switcher()` from the `webapp-theme-streamlit` package (see
+"Usage (Streamlit)" above) instead - it fetches `apps.json` (pinned to
+`@main`, not a tag - see above) and renders a small hand-rolled open/close
+dropdown, icon and all, the same way for every Streamlit app that calls it.
 
 ## What belongs here vs. in the app
 
