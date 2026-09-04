@@ -71,6 +71,17 @@ body {
   background-color: rgba(74,222,128,.18);
 }
 
+/* Bootstrap's default .navbar-toggler-icon is a dark stroke (rgba(0,0,0,.55)) meant for a
+   light navbar - our navbar is always dark (--ns-navbar), so without this override the
+   mobile hamburger icon is nearly invisible against it. Draw it in white instead. */
+.app-navbar .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+.app-navbar .navbar-toggler:focus {
+  box-shadow: 0 0 0 .2rem rgba(255,255,255,.25);
+}
+
 /* ── Page heading area ────────────────────────────────────────── */
 .page-heading h1 {
   font-size: 1.375rem;
