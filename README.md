@@ -103,7 +103,11 @@ dropdown, icon and all, the same way for every Streamlit app that calls it.
 
 This file only has generic, reusable pieces: color tokens, navbar, page
 heading, cards, the primary button, data tables, editable-table inputs,
-Select2 integration, and the empty-state pattern. A feature specific to one
+Select2 integration, the empty-state pattern, a search input
+(`.search-input-wrap` + `.search-input`), and a disclosure/collapsible
+section (`.disclosure` + `.disclosure-toggle` + `.disclosure-body` - JS
+just toggles a `collapsed` class on `.disclosure`, no Bootstrap JS
+needed). A feature specific to one
 app (e.g. a camera capture UI, a glucose-range chart) stays in that app's
 own stylesheet, loaded *after* this one, so it can still use the shared
 tokens (`var(--ns-primary)`, etc.) without polluting the shared file.

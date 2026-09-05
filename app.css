@@ -287,6 +287,76 @@ body {
   border-radius: .375rem;
 }
 
+/* ── Search input (icon + text field) ────────────────────────── */
+.search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-wrap i {
+  position: absolute;
+  left: 10px;
+  color: #94a3b8;
+  font-size: .8rem;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 7px 10px 7px 30px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: .8125rem;
+  font-family: inherit;
+  color: #334155;
+  background: #fff;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--ns-primary);
+  box-shadow: 0 0 0 .2rem rgba(var(--ns-primary-rgb), .15);
+}
+
+/* ── Disclosure (collapsible section with a chevron-toggle header) ──
+   Not Bootstrap's .collapse (that needs its JS bundle, which not every
+   app loads - health-gen-ai-chat's chat_agent/index.html doesn't) -
+   this is a plain CSS toggle: JS just flips `collapsed` on .disclosure,
+   nothing else to wire up. */
+.disclosure-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 4px 6px;
+  margin-bottom: 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: .75rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  border-radius: 4px;
+}
+
+.disclosure-toggle:hover { background: #f1f5f9; color: #334155; }
+
+.disclosure-toggle i { transition: transform .15s ease; font-size: .7rem; }
+
+.disclosure.collapsed .disclosure-toggle i { transform: rotate(-90deg); }
+
+.disclosure-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.disclosure.collapsed .disclosure-body { display: none; }
+
 /* ── Responsive tweaks ────────────────────────────────────────── */
 @media (max-width: 575.98px) {
   .page-heading h1 { font-size: 1.2rem; }
