@@ -1,17 +1,17 @@
 # webapp-theme-streamlit
 
-Shared navbar + app-switcher rendering for every Streamlit app in this household's stack (`cgm_abbot_connector`, `health-gen-ai-chat`'s dashboard) - the Streamlit-side equivalent of this repo's `app.css`/`switcher.js` for the Bootstrap apps, which Streamlit can't use directly (see the module docstring in `src/webapp_theme_streamlit/__init__.py` for why).
+Shared navbar + app-switcher rendering for every Streamlit app in this household's stack (`datacarebot-cgm`, `datacarebot-chat`'s dashboard) - the Streamlit-side equivalent of this repo's `app.css`/`switcher.js` for the Bootstrap apps, which Streamlit can't use directly (see the module docstring in `src/webapp_theme_streamlit/__init__.py` for why).
 
 ## Install
 
 ```toml
 # pyproject.toml
 dependencies = [
-    "webapp-theme-streamlit @ git+https://github.com/robertobeanuoc/webapp-theme.git@main#subdirectory=python",
+    "webapp-theme-streamlit @ git+https://github.com/robertobeanuoc/datacarebot-theme.git@main#subdirectory=python",
 ]
 ```
 
-Pinned to `@main`, same as `streamlit-authentik-login` - `uv.lock` records the exact commit at lock time, so a later push here doesn't silently change a running app; run `uv lock --upgrade-package webapp-theme-streamlit` to pick up a change.
+Pinned to `@main`, same as `datacarebot-streamlit-auth` - `uv.lock` records the exact commit at lock time, so a later push here doesn't silently change a running app; run `uv lock --upgrade-package webapp-theme-streamlit` to pick up a change.
 
 ## Usage
 

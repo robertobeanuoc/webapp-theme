@@ -1,10 +1,10 @@
 """Shared navbar/app-switcher rendering for every Streamlit app in this
-household's stack (cgm_abbot_connector, health-gen-ai-chat's dashboard).
+household's stack (datacarebot-cgm, datacarebot-chat's dashboard).
 
 Extracted here after the same ~150 lines of CSS/HTML/JS were found
 duplicated - and had already drifted - between both apps: a fix for the
-app-switcher's icon landed in cgm_abbot_connector but not
-health-gen-ai-chat, since there was no single place to fix it once for
+app-switcher's icon landed in datacarebot-cgm but not
+datacarebot-chat, since there was no single place to fix it once for
 both. This package is that place.
 
 Split from the Bootstrap apps' switcher.js/app.css (also in this repo)
@@ -37,8 +37,8 @@ import textwrap
 import requests
 import streamlit as st
 
-DEFAULT_APP_CSS_URL = "https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.1.0/app.css"
-DEFAULT_APPS_JSON_URL = "https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@main/apps.json"
+DEFAULT_APP_CSS_URL = "https://cdn.jsdelivr.net/gh/robertobeanuoc/datacarebot-theme@v1.1.0/app.css"
+DEFAULT_APPS_JSON_URL = "https://cdn.jsdelivr.net/gh/robertobeanuoc/datacarebot-theme@main/apps.json"
 
 
 def strip_css_comments(css: str) -> str:
@@ -195,7 +195,7 @@ def inject_shared_theme(extra_css: str = "", app_css_url: str = DEFAULT_APP_CSS_
 @st.cache_data(ttl=60)  # short: apps.json lives on @main and can change without a tag bump
 def fetch_apps_directory(url: str = DEFAULT_APPS_JSON_URL) -> list[dict]:
     """The cross-app navigation directory - see
-    https://github.com/robertobeanuoc/webapp-theme's apps.json. `[]` (menu
+    https://github.com/robertobeanuoc/datacarebot-theme's apps.json. `[]` (menu
     just doesn't render) rather than an error if the CDN is briefly
     unreachable - this is a nice-to-have, not core functionality."""
     try:

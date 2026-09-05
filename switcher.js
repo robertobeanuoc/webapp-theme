@@ -11,11 +11,11 @@
  *
  *   <li class="nav-item" id="app-switcher" data-current-app="chat"></li>
  *   <script>window.__USER_GROUPS__ = {{ session.user.groups | tojson }};</script>
- *   <script src="https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.3.0/switcher.js" defer></script>
+ *   <script src="https://cdn.jsdelivr.net/gh/robertobeanuoc/datacarebot-theme@v1.3.0/switcher.js" defer></script>
  *
  * Needs Bootstrap 5's JS bundle already on the page for the dropdown to
  * open (every app in this family already loads it for the navbar collapse
- * behavior, except health-gen-ai-chat's chat_agent/index.html, which
+ * behavior, except datacarebot-chat's chat_agent/index.html, which
  * doesn't use any other Bootstrap JS component yet - add the bundle there
  * too, not a second copy of dropdown-only JS).
  *
@@ -26,7 +26,7 @@
   // Pinned to @main, not a version tag like this script itself - apps.json is pure data
   // (URLs/names/groups), so a change to it doesn't need a tag bump + re-pin in every app to go
   // live. See README.md's "Releasing an apps.json change".
-  var APPS_URL = "https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@main/apps.json";
+  var APPS_URL = "https://cdn.jsdelivr.net/gh/robertobeanuoc/datacarebot-theme@main/apps.json";
 
   var mount = document.getElementById("app-switcher");
   if (!mount) return;

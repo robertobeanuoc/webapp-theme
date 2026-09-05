@@ -1,5 +1,5 @@
 {
-  "_comment": "Cross-app navigation directory, shared by every app in this family so the switcher menu is defined once instead of duplicated per repo. `authentik_group` must match a group created by user-management-apps's authentik/scripts/setup_app_access_control.py — an app only shows up in a given user's switcher if one of their OIDC `groups` claim values equals this field. `icon` is a Bootstrap Icons class (bi-...) for the Bootstrap/Jinja apps; `emoji` is the fallback for Streamlit apps, which can't load the Bootstrap Icons font (see cgm_abbot_connector/src/streamlit_dashboard.py's _render_navbar for why).",
+  "_comment": "Cross-app navigation directory, shared by every app in this family so the switcher menu is defined once instead of duplicated per repo. `authentik_group` must match a group created by datacarebot-identity's authentik/scripts/setup_app_access_control.py — an app only shows up in a given user's switcher if one of their OIDC `groups` claim values equals this field. `icon` is a Bootstrap Icons class (bi-...) for the Bootstrap/Jinja apps; `emoji` is the fallback for Streamlit apps, which can't load the Bootstrap Icons font (see datacarebot-cgm/src/streamlit_dashboard.py's _render_navbar for why).",
   "apps": [
     {
       "id": "chat",

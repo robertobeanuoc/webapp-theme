@@ -1,11 +1,11 @@
-# webapp-theme
+# datacarebot-theme
 
 Shared visual theme (design tokens, navbar, cards, tables, buttons) for
 robertobeanuoc's small Flask/Jinja + Bootstrap 5 apps, so they look like one
 family of apps instead of each inventing its own look.
 
-Consumers today: `food_recognition_model`, `health-gen-ai-chat`,
-`strava_to_db`, `cgm_abbot_connector`.
+Consumers today: `datacarebot-food`, `datacarebot-chat`,
+`datacarebot-activity`, `datacarebot-cgm`.
 
 ## Usage (Flask / Jinja / any static HTML)
 
@@ -17,7 +17,7 @@ no local copy to keep in sync:
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.3.0/app.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/robertobeanuoc/datacarebot-theme@v1.3.0/app.css">
 ```
 
 Pin a version tag (`@v1.3.0`), not `@main` — a change here shouldn't be able
@@ -51,8 +51,8 @@ tag instead) and combining it with the navbar/switcher CSS every Streamlit
 app in this family needs. Streamlit's own widgets (buttons, selects) are
 themed separately, since they don't carry Bootstrap's class names — fetch
 `theme.toml` and write it to `~/.streamlit/config.toml` before the
-Streamlit server starts; see `cgm_abbot_connector`'s or
-`health-gen-ai-chat`'s `write_streamlit_secrets.py` for a working example
+Streamlit server starts; see `datacarebot-cgm`'s or
+`datacarebot-chat`'s `write_streamlit_secrets.py` for a working example
 (it already runs once at container startup, before `streamlit run`, to
 provision the OIDC `[auth]` secrets and TLS cert the same way).
 
@@ -60,7 +60,7 @@ provision the OIDC `[auth]` secrets and TLS cert the same way).
 
 `apps.json` is the one place every app's identity (name, URL, icon) and
 which Authentik access group grants entry to it are listed — see
-`user-management-apps`'s `authentik/scripts/setup_app_access_control.py`
+`datacarebot-identity`'s `authentik/scripts/setup_app_access_control.py`
 for how those groups get created and populated. Each app reads the logged-in
 user's `groups` claim from its own OIDC token (request `groups` as an extra
 scope — none of `openid`/`profile`/`email`/`offline_access` surface it) and
@@ -81,7 +81,7 @@ or removes the mount point entirely if the user has access to nothing else:
 ```html
 <li class="nav-item" id="app-switcher" data-current-app="chat"></li>
 <script>window.__USER_GROUPS__ = {{ session.user.groups | tojson }};</script>
-<script src="https://cdn.jsdelivr.net/gh/robertobeanuoc/webapp-theme@v1.3.0/switcher.js" defer></script>
+<script src="https://cdn.jsdelivr.net/gh/robertobeanuoc/datacarebot-theme@v1.3.0/switcher.js" defer></script>
 ```
 
 `switcher.js` itself stays pinned to a tag (it's code); only the `apps.json`
@@ -137,7 +137,7 @@ Two caches sit between that push and every app actually seeing it:
    cached indefinitely since a tag shouldn't change) refreshes every ~12h on
    its own. To force it sooner, purge that one file:
    ```bash
-   curl "https://purge.jsdelivr.net/gh/robertobeanuoc/webapp-theme@main/apps.json"
+   curl "https://purge.jsdelivr.net/gh/robertobeanuoc/datacarebot-theme@main/apps.json"
    ```
 2. **Each Streamlit app's own `@st.cache_data(ttl=60)`** on `_fetch_apps_directory()`
    (see above) - expires on its own within a minute, nothing to purge.

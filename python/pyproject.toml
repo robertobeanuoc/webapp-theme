@@ -1,7 +1,7 @@
 [project]
 name = "webapp-theme-streamlit"
 version = "0.1.0"
-description = "Shared Streamlit navbar/app-switcher rendering for robertobeanuoc's Streamlit apps (same family as webapp-theme's app.css/switcher.js for the Bootstrap apps)."
+description = "Shared Streamlit navbar/app-switcher rendering for robertobeanuoc's Streamlit apps (same family as datacarebot-theme's app.css/switcher.js for the Bootstrap apps)."
 requires-python = ">=3.11"
 dependencies = [
     "streamlit>=1.42.0",
